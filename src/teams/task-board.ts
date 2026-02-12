@@ -41,4 +41,8 @@ export class TaskBoard {
       task.result = result;
     }
   }
+
+  clear(): void {
+    this.tasks.clear();
+  }
 }

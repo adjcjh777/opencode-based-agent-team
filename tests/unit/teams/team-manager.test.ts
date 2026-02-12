@@ -105,5 +105,20 @@ describe('TeamManager', () => {
         type: 'message'
       }
     ]);
+
+    manager.selectPreviousTeammate();
+    expect(manager.getSelectedTeammate()).toBe('worker-1');
+  });
+
+  it('cleanup resets tasks and member state to offline', async () => {
+    const manager = new TeamManager(config);
+    await manager.spawn();
+    await manager.planAndAssign('Task A\nTask B');
+
+    await manager.cleanup();
+
+    expect(manager.listTasks()).toEqual([]);
+    expect(manager.getMemberStatus('worker-1')).toBe('offline');
+    expect(manager.getMemberStatus('worker-2')).toBe('offline');
   });
 });

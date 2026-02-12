@@ -111,6 +111,16 @@ export class TeamManager {
     return this.getSelectedTeammate();
   }
 
+  selectPreviousTeammate(): string | undefined {
+    if (this.config.members.length === 0) {
+      return undefined;
+    }
+
+    this.selectedMemberIndex =
+      (this.selectedMemberIndex - 1 + this.config.members.length) % this.config.members.length;
+    return this.getSelectedTeammate();
+  }
+
   async sendDirectMessage(content: string): Promise<void> {
     const teammateId = this.getSelectedTeammate();
     if (!teammateId) {
@@ -133,6 +143,11 @@ export class TeamManager {
 
   readInbox(memberId: string): TeamMessage[] {
     return this.messageBus.readInbox(memberId);
+  }
+
+  async cleanup(): Promise<void> {
+    await this.shutdown();
+    this.taskBoard.clear();
   }
 
   private pickIdleMember(): string | undefined {
