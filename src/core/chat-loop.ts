@@ -1,4 +1,5 @@
 import type { LLMAdapter } from '../llm/adapter.js';
+import { collectTextFromChunks } from '../llm/streaming.js';
 import type { SessionManager } from '../session/manager.js';
 import type { Logger } from './logger.js';
 import { withRetry } from './retry.js';
@@ -22,12 +23,7 @@ export async function runSingleTurnChatLoop({
 
   const assistantText = await withRetry(
     async () => {
-      let text = '';
-      for await (const chunk of adapter.chat(session.getMessages())) {
-        text += chunk.text;
-      }
-
-      return text;
+      return collectTextFromChunks(adapter.chat(session.getMessages()));
     },
     {
       retries,

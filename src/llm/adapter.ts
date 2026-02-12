@@ -12,6 +12,7 @@ import { createGoogleModelResolver } from './providers/google.js';
 import { createOllamaModelResolver } from './providers/ollama.js';
 import { createOpenAICompatModelResolver } from './providers/openai-compat.js';
 import { createRightCodesModelResolver } from './providers/right-codes-factory.js';
+import { toChunkStream } from './streaming.js';
 import type { LLMConfig, LLMMessage, LLMStreamChunk } from './types.js';
 
 type ModelResolver = (modelId: string) => any;
@@ -104,8 +105,8 @@ export class LLMAdapter {
       messages
     });
 
-    for await (const text of result.textStream) {
-      yield { text };
+    for await (const chunk of toChunkStream(result.textStream)) {
+      yield chunk;
     }
   }
 }
