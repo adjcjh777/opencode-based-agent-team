@@ -16,8 +16,40 @@ export interface RightCodesProviderConfig {
   defaultModel?: string;
 }
 
+export interface OpenAICompatibleProviderConfig {
+  type: 'openai-compatible';
+  apiKey?: string;
+  baseUrl?: string;
+  defaultModel?: string;
+}
+
+export interface AnthropicProviderConfig {
+  type: 'anthropic';
+  apiKey?: string;
+  defaultModel?: string;
+}
+
+export interface GoogleProviderConfig {
+  type: 'google';
+  apiKey?: string;
+  defaultModel?: string;
+}
+
+export interface OllamaProviderConfig {
+  type: 'ollama';
+  baseUrl?: string;
+  defaultModel?: string;
+}
+
+export type ProviderConfig =
+  | RightCodesProviderConfig
+  | OpenAICompatibleProviderConfig
+  | AnthropicProviderConfig
+  | GoogleProviderConfig
+  | OllamaProviderConfig;
+
 export interface LLMConfig {
-  provider: RightCodesProviderConfig;
+  provider: ProviderConfig;
   models: {
     primary: string;
     fast: string;

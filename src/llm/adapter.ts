@@ -1,7 +1,13 @@
 import { streamText as defaultStreamText } from 'ai';
 import { createOpenAI as defaultCreateOpenAI } from '@ai-sdk/openai';
 
-import { resolveRightCodesConfig } from './providers/right-codes.js';
+import {
+  resolveAnthropicConfig,
+  resolveGoogleConfig,
+  resolveOllamaConfig,
+  resolveOpenAICompatConfig,
+  resolveRightCodesConfig
+} from './providers/right-codes.js';
 import type { LLMConfig, LLMMessage, LLMStreamChunk } from './types.js';
 
 type ModelResolver = (modelId: string) => any;
@@ -12,6 +18,8 @@ interface AdapterDeps {
     baseURL: string;
     compatibility: 'compatible';
   }) => ModelResolver;
+  createAnthropic?: (options: { apiKey: string }) => ModelResolver;
+  createGoogle?: (options: { apiKey: string }) => ModelResolver;
   streamText?: (options: any) => Promise<{ textStream: AsyncIterable<string> }>;
   env?: NodeJS.ProcessEnv;
 }
@@ -33,20 +41,65 @@ export class LLMAdapter {
 
   static create(config: LLMConfig, deps: AdapterDeps = {}): LLMAdapter {
     const env = deps.env ?? process.env;
-    const provider = resolveRightCodesConfig(config.provider, env);
 
     const createOpenAI = deps.createOpenAI ?? defaultCreateOpenAI;
+    const createAnthropic = deps.createAnthropic ?? (() => {
+      throw new Error('Anthropic provider is not configured in this runtime.');
+    });
+    const createGoogle = deps.createGoogle ?? (() => {
+      throw new Error('Google provider is not configured in this runtime.');
+    });
     const streamTextImpl =
       deps.streamText ??
       ((defaultStreamText as unknown) as (options: any) => Promise<{ textStream: AsyncIterable<string> }>);
 
-    const modelResolver = createOpenAI({
-      apiKey: provider.apiKey,
-      baseURL: provider.baseUrl,
-      compatibility: 'compatible'
-    });
+    let modelResolver: ModelResolver;
+    let defaultModel = config.models.primary;
 
-    const defaultModel = provider.defaultModel ?? config.models.primary;
+    switch (config.provider.type) {
+      case 'right-codes': {
+        const provider = resolveRightCodesConfig(config.provider, env);
+        modelResolver = createOpenAI({
+          apiKey: provider.apiKey,
+          baseURL: provider.baseUrl,
+          compatibility: 'compatible'
+        });
+        defaultModel = provider.defaultModel ?? config.models.primary;
+        break;
+      }
+      case 'openai-compatible': {
+        const provider = resolveOpenAICompatConfig(config.provider, env);
+        modelResolver = createOpenAI({
+          apiKey: provider.apiKey,
+          baseURL: provider.baseUrl,
+          compatibility: 'compatible'
+        });
+        defaultModel = provider.defaultModel ?? config.models.primary;
+        break;
+      }
+      case 'anthropic': {
+        const provider = resolveAnthropicConfig(config.provider, env);
+        modelResolver = createAnthropic({ apiKey: provider.apiKey });
+        defaultModel = provider.defaultModel ?? config.models.primary;
+        break;
+      }
+      case 'google': {
+        const provider = resolveGoogleConfig(config.provider, env);
+        modelResolver = createGoogle({ apiKey: provider.apiKey });
+        defaultModel = provider.defaultModel ?? config.models.primary;
+        break;
+      }
+      case 'ollama': {
+        const provider = resolveOllamaConfig(config.provider, env);
+        modelResolver = createOpenAI({
+          apiKey: 'ollama',
+          baseURL: provider.baseUrl,
+          compatibility: 'compatible'
+        });
+        defaultModel = provider.defaultModel ?? config.models.primary;
+        break;
+      }
+    }
 
     return new LLMAdapter(modelResolver, streamTextImpl, defaultModel);
   }
