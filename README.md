@@ -20,12 +20,22 @@ The implementation currently includes:
   - `ollama`
 - Session layer with in-memory manager, SQLite persistence, and history query helper
 - Core reliability utilities (retry + logger)
+- Streaming helpers (`src/llm/streaming.ts`) for chunk/text conversion
+- UI panel formatters, hooks, and theme primitives
+- Starter agent prompt resources in `agents/`
+- Example custom skill template in `skills/example-skill.md`
 
 ## Quick Start
 
 ```bash
 npm install
 npm run dev -- chat
+```
+
+Single-turn mode (non-interactive):
+
+```bash
+npm run dev -- chat --agent build --message "Summarize this repository"
 ```
 
 Show effective configuration:
