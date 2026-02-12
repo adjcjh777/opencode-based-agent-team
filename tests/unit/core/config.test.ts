@@ -41,8 +41,10 @@ describe('loadConfig', () => {
 
     const config = await loadConfig({ cwd: dir });
 
-    expect(config.provider.type).toBe('right-codes');
-    expect(config.provider.baseUrl).toBe('https://example.right.codes/v1');
+    expect(config.provider).toMatchObject({
+      type: 'right-codes',
+      baseUrl: 'https://example.right.codes/v1'
+    });
     expect(config.models.primary).toBe('claude-sonnet-4');
   });
 
@@ -72,8 +74,11 @@ describe('loadConfig', () => {
       }
     });
 
-    expect(config.provider.apiKey).toBe('env-key');
-    expect(config.provider.baseUrl).toBe('https://env.right.codes/v1');
+    expect(config.provider).toMatchObject({
+      type: 'right-codes',
+      apiKey: 'env-key',
+      baseUrl: 'https://env.right.codes/v1'
+    });
   });
 
   it('throws a helpful error when required provider fields are missing', async () => {
@@ -124,8 +129,10 @@ describe('loadConfig', () => {
       }
     });
 
-    expect(config.provider.type).toBe('anthropic');
-    expect(config.provider.apiKey).toBe('anthropic-env-key');
+    expect(config.provider).toMatchObject({
+      type: 'anthropic',
+      apiKey: 'anthropic-env-key'
+    });
   });
 
   it('loads ollama provider with default local base url', async () => {
@@ -148,7 +155,9 @@ describe('loadConfig', () => {
 
     const config = await loadConfig({ cwd: dir, env: {} });
 
-    expect(config.provider.type).toBe('ollama');
-    expect(config.provider.baseUrl).toBe('http://localhost:11434/v1');
+    expect(config.provider).toMatchObject({
+      type: 'ollama',
+      baseUrl: 'http://localhost:11434/v1'
+    });
   });
 });
