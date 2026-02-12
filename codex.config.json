@@ -1,0 +1,14 @@
+{
+  "$schema": "./config-schema.json",
+  "provider": {
+    "type": "right-codes",
+    "baseUrl": "https://your-endpoint.right.codes/v1",
+    "apiKey": "${RC_API_KEY}",
+    "defaultModel": "claude-sonnet-4"
+  },
+  "models": {
+    "primary": "claude-sonnet-4",
+    "fast": "claude-haiku-4",
+    "reasoning": "claude-opus-4"
+  }
+}

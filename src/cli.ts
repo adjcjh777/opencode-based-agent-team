@@ -1,13 +1,16 @@
 import { Command } from 'commander';
 
+import { loadConfig } from './core/config.js';
+
 function createConfigCommand(): Command {
   const configCommand = new Command('config').description('Inspect configuration and providers');
 
   configCommand
     .command('show')
     .description('Show effective configuration')
-    .action(() => {
-      process.stdout.write('Configuration command is ready.\n');
+    .action(async () => {
+      const config = await loadConfig();
+      process.stdout.write(`${JSON.stringify(config, null, 2)}\n`);
     });
 
   return configCommand;
