@@ -1,14 +1,54 @@
 import { cosmiconfig } from 'cosmiconfig';
 import { z } from 'zod';
 
+import {
+  resolveAnthropicConfig,
+  resolveGoogleConfig,
+  resolveOllamaConfig,
+  resolveOpenAICompatConfig,
+  resolveRightCodesConfig
+} from '../llm/providers/right-codes.js';
+
 const providerSchema = z
-  .object({
-    type: z.literal('right-codes'),
-    apiKey: z.string().optional(),
-    baseUrl: z.string().optional(),
-    defaultModel: z.string().optional()
-  })
-  .strict();
+  .discriminatedUnion('type', [
+    z
+      .object({
+        type: z.literal('right-codes'),
+        apiKey: z.string().optional(),
+        baseUrl: z.string().optional(),
+        defaultModel: z.string().optional()
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal('openai-compatible'),
+        apiKey: z.string().optional(),
+        baseUrl: z.string().optional(),
+        defaultModel: z.string().optional()
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal('anthropic'),
+        apiKey: z.string().optional(),
+        defaultModel: z.string().optional()
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal('google'),
+        apiKey: z.string().optional(),
+        defaultModel: z.string().optional()
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal('ollama'),
+        baseUrl: z.string().optional(),
+        defaultModel: z.string().optional()
+      })
+      .strict()
+  ]);
 
 const configSchema = z
   .object({
@@ -55,42 +95,61 @@ export interface LoadConfigOptions {
   env?: NodeJS.ProcessEnv;
 }
 
-function normalizeEnvValue(value: string | undefined): string | undefined {
-  if (!value) {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  if (!trimmed.length) {
-    return undefined;
-  }
-
-  if (/^\$\{.+\}$/.test(trimmed)) {
-    return undefined;
-  }
-
-  return trimmed;
-}
-
-function applyRightCodesEnvFallback(
-  config: CodexConfig,
-  env: NodeJS.ProcessEnv
-): CodexConfig {
-  const apiKey = normalizeEnvValue(config.provider.apiKey) ?? normalizeEnvValue(env.RC_API_KEY);
-  const baseUrl = normalizeEnvValue(config.provider.baseUrl) ?? normalizeEnvValue(env.RC_BASE_URL);
-
-  if (!apiKey || !baseUrl) {
-    throw new Error('Missing right.codes credentials: set RC_API_KEY and RC_BASE_URL.');
-  }
-
-  return {
-    ...config,
-    provider: {
-      ...config.provider,
-      apiKey,
-      baseUrl
+function applyProviderEnvFallback(config: CodexConfig, env: NodeJS.ProcessEnv): CodexConfig {
+  switch (config.provider.type) {
+    case 'right-codes': {
+      const resolved = resolveRightCodesConfig(config.provider, env);
+      return {
+        ...config,
+        provider: {
+          ...config.provider,
+          apiKey: resolved.apiKey,
+          baseUrl: resolved.baseUrl
+        }
+      };
     }
-  };
+    case 'openai-compatible': {
+      const resolved = resolveOpenAICompatConfig(config.provider, env);
+      return {
+        ...config,
+        provider: {
+          ...config.provider,
+          apiKey: resolved.apiKey,
+          baseUrl: resolved.baseUrl
+        }
+      };
+    }
+    case 'anthropic': {
+      const resolved = resolveAnthropicConfig(config.provider, env);
+      return {
+        ...config,
+        provider: {
+          ...config.provider,
+          apiKey: resolved.apiKey
+        }
+      };
+    }
+    case 'google': {
+      const resolved = resolveGoogleConfig(config.provider, env);
+      return {
+        ...config,
+        provider: {
+          ...config.provider,
+          apiKey: resolved.apiKey
+        }
+      };
+    }
+    case 'ollama': {
+      const resolved = resolveOllamaConfig(config.provider, env);
+      return {
+        ...config,
+        provider: {
+          ...config.provider,
+          baseUrl: resolved.baseUrl
+        }
+      };
+    }
+  }
 }
 
 export async function loadConfig(options: LoadConfigOptions = {}): Promise<CodexConfig> {
@@ -107,5 +166,5 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Codex
   }
 
   const parsed = configSchema.parse(result.config);
-  return applyRightCodesEnvFallback(parsed, env);
+  return applyProviderEnvFallback(parsed, env);
 }

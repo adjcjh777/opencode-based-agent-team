@@ -97,4 +97,58 @@ describe('loadConfig', () => {
       'Missing right.codes credentials'
     );
   });
+
+  it('loads anthropic provider config with env fallback', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'anthropic',
+          apiKey: '${ANTHROPIC_API_KEY}',
+          defaultModel: 'claude-3-7-sonnet-latest'
+        },
+        models: {
+          primary: 'claude-3-7-sonnet-latest',
+          fast: 'claude-3-5-haiku-latest',
+          reasoning: 'claude-3-7-sonnet-latest'
+        }
+      })
+    );
+
+    const config = await loadConfig({
+      cwd: dir,
+      env: {
+        ANTHROPIC_API_KEY: 'anthropic-env-key'
+      }
+    });
+
+    expect(config.provider.type).toBe('anthropic');
+    expect(config.provider.apiKey).toBe('anthropic-env-key');
+  });
+
+  it('loads ollama provider with default local base url', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'ollama',
+          defaultModel: 'qwen2.5-coder:latest'
+        },
+        models: {
+          primary: 'qwen2.5-coder:latest',
+          fast: 'qwen2.5:latest',
+          reasoning: 'qwen2.5-coder:latest'
+        }
+      })
+    );
+
+    const config = await loadConfig({ cwd: dir, env: {} });
+
+    expect(config.provider.type).toBe('ollama');
+    expect(config.provider.baseUrl).toBe('http://localhost:11434/v1');
+  });
 });
