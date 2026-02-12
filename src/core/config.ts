@@ -19,7 +19,32 @@ const configSchema = z
         fast: z.string(),
         reasoning: z.string()
       })
-      .strict()
+      .strict(),
+    mcp: z
+      .object({
+        servers: z
+          .array(
+            z.union([
+              z
+                .object({
+                  id: z.string(),
+                  transport: z.literal('stdio'),
+                  command: z.string(),
+                  args: z.array(z.string()).optional()
+                })
+                .strict(),
+              z
+                .object({
+                  id: z.string(),
+                  transport: z.literal('sse'),
+                  url: z.string()
+                })
+                .strict()
+            ])
+          )
+          .optional()
+      })
+      .optional()
   })
   .strict();
 
