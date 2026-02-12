@@ -1,5 +1,4 @@
 import { streamText as defaultStreamText } from 'ai';
-import { createOpenAI as defaultCreateOpenAI } from '@ai-sdk/openai';
 
 import {
   resolveAnthropicConfig,
@@ -8,6 +7,11 @@ import {
   resolveOpenAICompatConfig,
   resolveRightCodesConfig
 } from './providers/right-codes.js';
+import { createAnthropicModelResolver } from './providers/anthropic.js';
+import { createGoogleModelResolver } from './providers/google.js';
+import { createOllamaModelResolver } from './providers/ollama.js';
+import { createOpenAICompatModelResolver } from './providers/openai-compat.js';
+import { createRightCodesModelResolver } from './providers/right-codes-factory.js';
 import type { LLMConfig, LLMMessage, LLMStreamChunk } from './types.js';
 
 type ModelResolver = (modelId: string) => any;
@@ -41,14 +45,6 @@ export class LLMAdapter {
 
   static create(config: LLMConfig, deps: AdapterDeps = {}): LLMAdapter {
     const env = deps.env ?? process.env;
-
-    const createOpenAI = deps.createOpenAI ?? defaultCreateOpenAI;
-    const createAnthropic = deps.createAnthropic ?? (() => {
-      throw new Error('Anthropic provider is not configured in this runtime.');
-    });
-    const createGoogle = deps.createGoogle ?? (() => {
-      throw new Error('Google provider is not configured in this runtime.');
-    });
     const streamTextImpl =
       deps.streamText ??
       ((defaultStreamText as unknown) as (options: any) => Promise<{ textStream: AsyncIterable<string> }>);
@@ -59,42 +55,40 @@ export class LLMAdapter {
     switch (config.provider.type) {
       case 'right-codes': {
         const provider = resolveRightCodesConfig(config.provider, env);
-        modelResolver = createOpenAI({
-          apiKey: provider.apiKey,
-          baseURL: provider.baseUrl,
-          compatibility: 'compatible'
+        modelResolver = createRightCodesModelResolver(provider, {
+          createOpenAI: deps.createOpenAI
         });
         defaultModel = provider.defaultModel ?? config.models.primary;
         break;
       }
       case 'openai-compatible': {
         const provider = resolveOpenAICompatConfig(config.provider, env);
-        modelResolver = createOpenAI({
-          apiKey: provider.apiKey,
-          baseURL: provider.baseUrl,
-          compatibility: 'compatible'
+        modelResolver = createOpenAICompatModelResolver(provider, {
+          createOpenAI: deps.createOpenAI
         });
         defaultModel = provider.defaultModel ?? config.models.primary;
         break;
       }
       case 'anthropic': {
         const provider = resolveAnthropicConfig(config.provider, env);
-        modelResolver = createAnthropic({ apiKey: provider.apiKey });
+        modelResolver = createAnthropicModelResolver(provider, {
+          createAnthropic: deps.createAnthropic
+        });
         defaultModel = provider.defaultModel ?? config.models.primary;
         break;
       }
       case 'google': {
         const provider = resolveGoogleConfig(config.provider, env);
-        modelResolver = createGoogle({ apiKey: provider.apiKey });
+        modelResolver = createGoogleModelResolver(provider, {
+          createGoogle: deps.createGoogle
+        });
         defaultModel = provider.defaultModel ?? config.models.primary;
         break;
       }
       case 'ollama': {
         const provider = resolveOllamaConfig(config.provider, env);
-        modelResolver = createOpenAI({
-          apiKey: 'ollama',
-          baseURL: provider.baseUrl,
-          compatibility: 'compatible'
+        modelResolver = createOllamaModelResolver(provider, {
+          createOpenAI: deps.createOpenAI
         });
         defaultModel = provider.defaultModel ?? config.models.primary;
         break;
