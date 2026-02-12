@@ -43,6 +43,8 @@ describe('TeamManager', () => {
     expect(tasks.length).toBe(2);
     expect(tasks.every((task) => task.assignee)).toBe(true);
     expect(tasks.every((task) => task.status === 'assigned')).toBe(true);
+    expect(manager.getMemberStatus('worker-1')).toBe('busy');
+    expect(manager.getMemberStatus('worker-2')).toBe('busy');
   });
 
   it('completes assigned task and updates member state to idle', async () => {

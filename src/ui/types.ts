@@ -6,4 +6,5 @@ export interface UiMessage {
 export interface AppProps {
   activeAgent: string;
   messages: UiMessage[];
+  teamDisplayLines?: string[];
 }

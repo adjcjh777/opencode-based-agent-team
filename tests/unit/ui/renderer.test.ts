@@ -17,9 +17,12 @@ describe('renderAppToLines', () => {
       messages: [
         { role: 'user', content: 'hello' },
         { role: 'assistant', content: 'hi there' }
-      ]
+      ],
+      teamDisplayLines: ['Team: review-team', '- security-reviewer (worker-1): busy']
     });
 
+    expect(lines).toContain('=== Team Status ===');
+    expect(lines).toContain('Team: review-team');
     expect(lines).toContain('You: hello');
     expect(lines).toContain('Assistant: hi there');
   });
