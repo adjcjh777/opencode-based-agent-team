@@ -160,4 +160,71 @@ describe('loadConfig', () => {
       baseUrl: 'http://localhost:11434/v1'
     });
   });
+
+  it('loads openai-compatible provider with env fallback', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'openai-compatible',
+          apiKey: '${OPENAI_COMPAT_API_KEY}',
+          baseUrl: '${OPENAI_COMPAT_BASE_URL}',
+          defaultModel: 'gpt-4o'
+        },
+        models: {
+          primary: 'gpt-4o',
+          fast: 'gpt-4o-mini',
+          reasoning: 'o3-mini'
+        }
+      })
+    );
+
+    const config = await loadConfig({
+      cwd: dir,
+      env: {
+        OPENAI_COMPAT_API_KEY: 'compat-env-key',
+        OPENAI_COMPAT_BASE_URL: 'https://proxy.example.com/v1'
+      }
+    });
+
+    expect(config.provider).toMatchObject({
+      type: 'openai-compatible',
+      apiKey: 'compat-env-key',
+      baseUrl: 'https://proxy.example.com/v1'
+    });
+  });
+
+  it('loads google provider config with env fallback', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'google',
+          apiKey: '${GOOGLE_API_KEY}',
+          defaultModel: 'gemini-2.0-flash'
+        },
+        models: {
+          primary: 'gemini-2.0-flash',
+          fast: 'gemini-2.0-flash-lite',
+          reasoning: 'gemini-2.0-pro'
+        }
+      })
+    );
+
+    const config = await loadConfig({
+      cwd: dir,
+      env: {
+        GOOGLE_API_KEY: 'google-env-key'
+      }
+    });
+
+    expect(config.provider).toMatchObject({
+      type: 'google',
+      apiKey: 'google-env-key'
+    });
+  });
 });
