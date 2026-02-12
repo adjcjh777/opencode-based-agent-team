@@ -38,4 +38,25 @@ describe('CoreEngine', () => {
     expect(engine.getSession()).toBe(session);
     expect(engine.getSession().getActiveAgent()).toBe('plan');
   });
+
+  it('injects system prompt once when configured', async () => {
+    const adapter = {
+      chat: vi.fn(async function* () {
+        yield { text: 'ok' };
+      })
+    } as unknown as LLMAdapter;
+
+    const engine = new CoreEngine({ adapter, systemPrompt: 'You are Build Agent.' });
+
+    await engine.runTurn('first');
+    await engine.runTurn('second');
+
+    expect(engine.getSession().getMessages()).toEqual([
+      { role: 'system', content: 'You are Build Agent.' },
+      { role: 'user', content: 'first' },
+      { role: 'assistant', content: 'ok' },
+      { role: 'user', content: 'second' },
+      { role: 'assistant', content: 'ok' }
+    ]);
+  });
 });

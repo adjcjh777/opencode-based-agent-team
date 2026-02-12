@@ -8,6 +8,7 @@ export interface CoreEngineOptions {
   session?: SessionManager;
   retries?: number;
   logger?: Logger;
+  systemPrompt?: string;
 }
 
 export interface CoreEngineTurnResult {
@@ -17,6 +18,7 @@ export interface CoreEngineTurnResult {
 
 export class CoreEngine {
   private readonly session: SessionManager;
+  private initialized = false;
 
   constructor(private readonly options: CoreEngineOptions) {
     this.session = options.session ?? new SessionManager();
@@ -27,6 +29,12 @@ export class CoreEngine {
   }
 
   async runTurn(userInput: string): Promise<CoreEngineTurnResult> {
+    if (!this.initialized && this.options.systemPrompt) {
+      this.session.addSystemMessage(this.options.systemPrompt);
+    }
+
+    this.initialized = true;
+
     const assistant = await runSingleTurnChatLoop({
       session: this.session,
       adapter: this.options.adapter,

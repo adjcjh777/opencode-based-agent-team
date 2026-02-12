@@ -23,6 +23,11 @@ export class SessionManager {
     this.persist();
   }
 
+  addSystemMessage(content: string): void {
+    this.messages.push({ role: 'system', content });
+    this.persist();
+  }
+
   addAssistantMessage(content: string): void {
     this.messages.push({ role: 'assistant', content });
     this.persist();
