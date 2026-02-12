@@ -24,6 +24,9 @@ The implementation currently includes:
 - UI panel formatters, hooks, and theme primitives
 - Starter agent prompt resources in `agents/`
 - Example custom skill template in `skills/example-skill.md`
+- Chat context builder with:
+  - agent prompt loading from `agents/<agent>.md`
+  - skill activation from project `.codex/skills` and global `CODEX_HOME/skills`
 
 ## Quick Start
 
@@ -60,6 +63,17 @@ Depending on selected provider, additional variables are supported:
 - `ANTHROPIC_API_KEY`
 - `GOOGLE_API_KEY`
 - `OLLAMA_BASE_URL`
+
+Global Codex home (for shared skills/session assets):
+
+- `CODEX_HOME` (defaults to project `.codex` when unset)
+
+## Prompt & Skills Sources
+
+- Agent prompt files: `agents/build.md`, `agents/plan.md`, etc.
+- Project skills: `.codex/skills/*.md`
+- Global skills: `$CODEX_HOME/skills/*.md`
+- Built-in skills: `code-review`, `refactor`, `debug`
 
 ## Quality Gates
 
