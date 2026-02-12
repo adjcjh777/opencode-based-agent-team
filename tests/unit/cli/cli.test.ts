@@ -40,7 +40,12 @@ describe('createCli', () => {
 
       expect(process.env.CODEXAGENTTEAMS_UI).toBe('1');
       expect(runChat).toHaveBeenCalledTimes(1);
-      expect(runChat).toHaveBeenCalledWith({ agent: 'plan', message: 'hello' });
+      expect(runChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agent: 'plan',
+          message: 'hello'
+        })
+      );
     } finally {
       writeSpy.mockRestore();
       if (previous === undefined) {

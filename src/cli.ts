@@ -1,17 +1,23 @@
 import { Command } from 'commander';
+import { join } from 'node:path';
 
+import { loadAgentPrompt } from './agent/prompts.js';
 import { loadConfig } from './core/config.js';
 import { CoreEngine } from './core/engine.js';
 import { LLMAdapter } from './llm/adapter.js';
 import { SessionManager } from './session/manager.js';
+import { SkillManager } from './skills/manager.js';
 
 export interface ChatCommandOptions {
   agent: string;
   message?: string;
+  systemPrompt?: string;
 }
 
 export interface CliDeps {
   runChat?: (options: ChatCommandOptions) => Promise<void>;
+  cwd?: string;
+  codexHome?: string;
 }
 
 function createConfigCommand(): Command {
@@ -38,10 +44,31 @@ async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
   const config = await loadConfig();
   const adapter = LLMAdapter.create(config);
   const session = new SessionManager({ activeAgent: options.agent });
-  const engine = new CoreEngine({ adapter, session });
+  const engine = new CoreEngine({ adapter, session, systemPrompt: options.systemPrompt });
   const result = await engine.runTurn(options.message);
 
   process.stdout.write(`${result.assistant}\n`);
+}
+
+async function resolveChatContext(options: ChatCommandOptions, deps: CliDeps): Promise<ChatCommandOptions> {
+  const cwd = deps.cwd ?? process.cwd();
+  const codexHome = deps.codexHome ?? join(cwd, '.codex');
+
+  let systemPrompt = await loadAgentPrompt(options.agent, { projectRoot: cwd });
+  if (!systemPrompt) {
+    systemPrompt = `You are ${options.agent} agent.`;
+  }
+
+  if (options.message) {
+    const skillManager = new SkillManager({ projectRoot: cwd, codexHome });
+    const activated = await skillManager.activateForInput(options.message, systemPrompt);
+    systemPrompt = activated.prompt;
+  }
+
+  return {
+    ...options,
+    systemPrompt
+  };
 }
 
 function createChatCommand(deps: CliDeps): Command {
@@ -53,7 +80,8 @@ function createChatCommand(deps: CliDeps): Command {
     .option('--message <text>', 'send one message and exit')
     .action(async (options: ChatCommandOptions) => {
       process.env.CODEXAGENTTEAMS_UI = '1';
-      await runChat({ agent: options.agent, message: options.message });
+      const chatContext = await resolveChatContext({ agent: options.agent, message: options.message }, deps);
+      await runChat(chatContext);
     });
 }
 
