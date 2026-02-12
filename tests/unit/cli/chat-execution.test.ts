@@ -54,4 +54,48 @@ describe('chat command execution context', () => {
     expect(payload?.systemPrompt).toContain('Skill: review');
     expect(payload?.systemPrompt).toContain('Review prompt ext.');
   });
+
+  it('loads global skills from CODEX_HOME when codexHome is not provided', async () => {
+    const root = await createTempDir();
+    const agentsDir = join(root, 'agents');
+    const codexHome = await createTempDir();
+    const globalSkillsDir = join(codexHome, 'skills');
+    const previousCodexHome = process.env.CODEX_HOME;
+
+    await mkdir(agentsDir, { recursive: true });
+    await mkdir(globalSkillsDir, { recursive: true });
+
+    await writeFile(join(agentsDir, 'build.md'), 'Build prompt base.\n');
+    await writeFile(
+      join(globalSkillsDir, 'global-review.md'),
+      ['---', 'name: global-review', 'description: global review', 'trigger: review', '---', 'Global review prompt.'].join(
+        '\n'
+      )
+    );
+
+    process.env.CODEX_HOME = codexHome;
+
+    try {
+      const payloads: Array<{ systemPrompt?: string }> = [];
+      const runChat = vi.fn(async (options: { systemPrompt?: string }) => {
+        payloads.push(options);
+      });
+
+      const program = createCli({ runChat, cwd: root });
+
+      await program.parseAsync(['node', 'codexagentteams', 'chat', '--message', 'please review this'], {
+        from: 'node'
+      });
+
+      const payload = payloads[0];
+      expect(payload).toBeDefined();
+      expect(payload?.systemPrompt).toContain('Global review prompt.');
+    } finally {
+      if (previousCodexHome === undefined) {
+        delete process.env.CODEX_HOME;
+      } else {
+        process.env.CODEX_HOME = previousCodexHome;
+      }
+    }
+  });
 });

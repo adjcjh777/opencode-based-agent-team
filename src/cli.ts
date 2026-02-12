@@ -52,7 +52,7 @@ async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
 
 async function resolveChatContext(options: ChatCommandOptions, deps: CliDeps): Promise<ChatCommandOptions> {
   const cwd = deps.cwd ?? process.cwd();
-  const codexHome = deps.codexHome ?? join(cwd, '.codex');
+  const codexHome = deps.codexHome ?? process.env.CODEX_HOME ?? join(cwd, '.codex');
 
   let systemPrompt = await loadAgentPrompt(options.agent, { projectRoot: cwd });
   if (!systemPrompt) {
