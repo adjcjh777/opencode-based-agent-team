@@ -59,4 +59,51 @@ describe('TeamManager', () => {
     expect(manager.getTask(task.id)?.result).toBe('done');
     expect(manager.getMemberStatus(task.assignee ?? '')).toBe('idle');
   });
+
+  it('reports member state summary and supports shutdown lifecycle', async () => {
+    const manager = new TeamManager(config);
+    await manager.spawn();
+    await manager.planAndAssign('Task A');
+
+    expect(manager.monitor()).toMatchObject({
+      idle: 1,
+      busy: 1,
+      offline: 0,
+      total: 2
+    });
+
+    await manager.shutdown();
+
+    expect(manager.getMemberStatus('worker-1')).toBe('offline');
+    expect(manager.getMemberStatus('worker-2')).toBe('offline');
+    expect(manager.monitor()).toMatchObject({
+      idle: 0,
+      busy: 0,
+      offline: 2,
+      total: 2
+    });
+  });
+
+  it('cycles selected teammate and sends direct message', async () => {
+    const manager = new TeamManager(config);
+    await manager.spawn();
+
+    expect(manager.getSelectedTeammate()).toBe('worker-1');
+
+    manager.selectNextTeammate();
+    expect(manager.getSelectedTeammate()).toBe('worker-2');
+
+    await manager.sendDirectMessage('Please review latest diff');
+
+    expect(manager.readInbox('worker-2')).toEqual([
+      {
+        id: 'leader-1-1',
+        from: 'leader-1',
+        to: 'worker-2',
+        content: 'Please review latest diff',
+        timestamp: 1,
+        type: 'message'
+      }
+    ]);
+  });
 });
