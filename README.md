@@ -1,150 +1,90 @@
 # CodexAgentTeams
 
-Node.js + TypeScript CLI prototype inspired by OpenCode and Claude-style Agent Teams collaboration.
+`codexagentteams` 是一个 Node.js/TypeScript CLI，目标是对齐 OpenCode 的命令行体验，并在其上扩展 Agent Teams。
 
 ![CI](https://github.com/adjcjh777/opencode-based-agent-team/actions/workflows/ci.yml/badge.svg)
 
-## Current Status
+## 项目约束
 
-The implementation currently includes:
+- 本项目二进制只使用 `codexagentteams`
+- **不会**提供 `opencode` 别名
+- 目标是保持你本机官方 `opencode` 安装不受影响
 
-- Multi-agent foundation (primary agents, subagents, mention routing, switching)
-- Team collaboration core (leader, teammate, task board, message bus, team manager lifecycle)
-- Team display primitives for in-process rendering
-- Built-in tools (read/write/edit/list/glob/grep/bash/webfetch/websearch/patch)
-- MCP foundation with config loading, manager state, discovery, and registry wiring
-- Skills foundation with loader, registry, executor, and built-in skills
-- LLM adapter with provider routing:
-  - `right-codes`
-  - `openai-compatible`
-  - `anthropic`
-  - `google`
-  - `ollama`
-- Session layer with in-memory manager, SQLite persistence, and history query helper
-- Core reliability utilities (retry + logger)
-- Streaming helpers (`src/llm/streaming.ts`) for chunk/text conversion
-- UI panel formatters, hooks, and theme primitives
-- Starter agent prompt resources in `agents/`
-- Example custom skill template in `skills/example-skill.md`
-- Chat context builder with:
-  - agent prompt loading from `agents/<agent>.md`
-  - skill activation from project `.codex/skills` and global `CODEX_HOME/skills`
+## 快速开始
 
-## Quick Start
+### 1) 安装依赖
 
 ```bash
 npm install
+```
+
+### 2) 初始化项目配置
+
+```bash
 npm run dev -- init
-npm run dev -- chat
 ```
 
-Single-turn mode (non-interactive):
+### 3) 开发模式启动
 
 ```bash
-npm run dev -- chat --agent build --message "Summarize this repository"
+npm run dev
 ```
 
-Show effective configuration:
+> 无参数默认进入 `chat` 主链路。
+
+### 4) 本地链接为全局命令
 
 ```bash
-npm run dev -- config show
+npm run build
+npm link
+codexagentteams
 ```
 
-Validate configuration:
+## 核心命令面
 
-```bash
-npm run dev -- config validate
-```
+- `codexagentteams`：默认进入交互会话
+- `codexagentteams run "..."`：单轮执行并退出
+- `codexagentteams mcp list`
+- `codexagentteams mcp tools [serverId]`
+- `codexagentteams agent list`
+- `codexagentteams session list`
+- `codexagentteams session show <id>`
+- `codexagentteams team status`
+- `codexagentteams team run "task 1; task 2"`
+- `codexagentteams doctor`
 
-Run local diagnostics:
+## 配置摘要
 
-```bash
-npm run dev -- doctor
-```
+配置文件：`codex.config.json`
 
-## Environment Variables
+关键配置段：
 
-At minimum for `right-codes`:
+- `provider`：模型提供方
+- `models`：主/快/推理模型
+- `tools.permissions`：工具权限
+- `mcp.servers`：MCP 服务列表
+- `team`：Agent Teams 运行参数
 
-```bash
-RC_API_KEY=your_key
-RC_BASE_URL=https://your-endpoint.right.codes/v1
-```
+`team` 支持：
 
-Depending on selected provider, additional variables are supported:
+- `team.enabled`
+- `team.maxTeammates`
+- `team.strategy` (`balanced` / `parallel` / `sequential`)
+- `team.worker` (`in-process` / `worker`)
 
-- `OPENAI_COMPAT_API_KEY`
-- `OPENAI_COMPAT_BASE_URL`
-- `ANTHROPIC_API_KEY`
-- `GOOGLE_API_KEY`
-- `OLLAMA_BASE_URL`
-
-Global Codex home (for shared skills/session assets):
-
-- `CODEX_HOME` (defaults to project `.codex` when unset)
-
-## Prompt & Skills Sources
-
-- Agent prompt files: `agents/build.md`, `agents/plan.md`, etc.
-- Project skills: `.codex/skills/*.md`
-- Global skills: `$CODEX_HOME/skills/*.md`
-- Built-in skills: `code-review`, `refactor`, `debug`
-
-## Tool Permissions
-
-`codex.config.json` supports optional per-tool permission rules:
-
-```json
-{
-  "tools": {
-    "permissions": {
-      "read": "allow",
-      "bash": "ask",
-      "mcp_*": "deny"
-    }
-  }
-}
-```
-
-- Exact rules override wildcard rules.
-- When multiple wildcard rules match, the most specific pattern wins.
-- Tools without a matching rule default to `deny`.
-
-## Quality Gates
+## 质量门禁
 
 ```bash
 npm test
 npm run typecheck
 npm run lint
+npm run build
 ```
 
-All of the above are currently passing on branch `feature/phase1-foundation`.
+## 文档
 
-## Documentation
-
-- Detailed guide: `docs/USAGE.md`
-- Contributing guide: `CONTRIBUTING.md`
-- Security policy: `SECURITY.md`
-
-## CI
-
-- GitHub Actions workflow: `.github/workflows/ci.yml`
-- Trigger: push / pull request / manual dispatch
-- Matrix: `ubuntu-latest` + `windows-latest`, Node `20` + `22`
-- Jobs run: `lint`, `typecheck`, `test`, `build`, `doctor --json`
-
-## Release
-
-- GitHub Actions workflow: `.github/workflows/release.yml`
-- Trigger: tag push (e.g. `v0.2.0`) / manual dispatch
-- Publish target: npm registry (`NPM_TOKEN` secret required)
-
-## Governance
-
-- Dependency updates: `.github/dependabot.yml`
-- PR template: `.github/pull_request_template.md`
-- Issue templates: `.github/ISSUE_TEMPLATE/*.yml`
-
-## Security
-
-- Security policy: `SECURITY.md`
+- 使用手册：`docs/USAGE.md`
+- 架构说明：`docs/ARCHITECTURE.md`
+- OpenCode 迁移映射：`docs/migration/opencode-mapping.md`
+- 贡献指南：`CONTRIBUTING.md`
+- 安全策略：`SECURITY.md`

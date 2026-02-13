@@ -2,6 +2,16 @@
 
 This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 
+## Recovery Plan Status (OpenCode baseline + Agent Teams)
+
+- [x] P0: rollback command pollution (`opencode` alias removed)
+- [x] P0: stable CLI entrypoint + default no-arg startup path
+- [x] P1: core command surface (`run`, `mcp`, `agent`, `session`, `team`)
+- [x] P1: session persistence wired into `chat`/`run`
+- [x] P1: `team` runtime config section added (`enabled/maxTeammates/strategy/worker`)
+- [x] P3 docs: `README.md`, `docs/USAGE.md`, `docs/ARCHITECTURE.md`
+- [x] P3 docs: `docs/migration/opencode-mapping.md`
+
 ## Phase 1: Foundation + right.codes
 
 - [x] Project scaffold (`TypeScript`, `ESLint`, `Prettier`, `vitest`, `tsx`)
