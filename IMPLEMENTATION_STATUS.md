@@ -24,7 +24,7 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 ## Phase 3: Tools + MCP + Skills
 
 - [x] Tool interface and registry (`src/tools/types.ts`, `src/tools/registry.ts`)
-- [x] Permission manager (`src/tools/permission.ts`)
+- [x] Permission manager + runtime enforcement (`src/tools/permission.ts`, `src/tools/bootstrap.ts`)
 - [x] Built-in tools (`src/tools/builtin/*.ts`)
 - [x] Web tools (`src/tools/builtin/web-fetch.ts`, `src/tools/builtin/web-search.ts`)
 - [x] Windows shell behavior (`src/tools/builtin/bash.ts` via PowerShell)
@@ -59,4 +59,3 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 - [x] `npm test`
 - [x] `npm run typecheck`
 - [x] `npm run lint`
-

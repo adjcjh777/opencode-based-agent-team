@@ -75,6 +75,26 @@ Global Codex home (for shared skills/session assets):
 - Global skills: `$CODEX_HOME/skills/*.md`
 - Built-in skills: `code-review`, `refactor`, `debug`
 
+## Tool Permissions
+
+`codex.config.json` supports optional per-tool permission rules:
+
+```json
+{
+  "tools": {
+    "permissions": {
+      "read": "allow",
+      "bash": "ask",
+      "mcp_*": "deny"
+    }
+  }
+}
+```
+
+- Exact rules override wildcard rules.
+- When multiple wildcard rules match, the most specific pattern wins.
+- Tools without a matching rule default to `deny`.
+
 ## Quality Gates
 
 ```bash
