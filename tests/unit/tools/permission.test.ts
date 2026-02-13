@@ -39,4 +39,22 @@ describe('PermissionManager', () => {
 
     await expect(manager.check('unknown-tool', {})).resolves.toBe(false);
   });
+
+  it('supports wildcard patterns like mcp_*', async () => {
+    const manager = new PermissionManager({
+      'mcp_*': 'allow'
+    });
+
+    await expect(manager.check('mcp_filesystem_read_file', {})).resolves.toBe(true);
+  });
+
+  it('prefers exact match over wildcard pattern', async () => {
+    const manager = new PermissionManager({
+      'mcp_*': 'allow',
+      mcp_filesystem_delete_file: 'deny'
+    });
+
+    await expect(manager.check('mcp_filesystem_delete_file', {})).resolves.toBe(false);
+    await expect(manager.check('mcp_filesystem_read_file', {})).resolves.toBe(true);
+  });
 });
