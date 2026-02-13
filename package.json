@@ -3,14 +3,23 @@
   "version": "0.1.0",
   "description": "Node.js CLI with Agent Teams capabilities",
   "type": "module",
+  "bin": {
+    "codexagentteams": "dist/src/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/src/index.js",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepack": "npm run build"
   },
   "engines": {
     "node": ">=20"
