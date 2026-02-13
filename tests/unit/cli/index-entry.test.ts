@@ -19,6 +19,17 @@ describe('normalizeArgvForDefaultCommand', () => {
     ]);
   });
 
+  it('routes free-form input to run command', () => {
+    expect(normalizeArgvForDefaultCommand(['node', 'codexagentteams', 'review', 'this', 'repo'])).toEqual([
+      'node',
+      'codexagentteams',
+      'run',
+      'review',
+      'this',
+      'repo'
+    ]);
+  });
+
   it('preserves root help/version flags', () => {
     expect(normalizeArgvForDefaultCommand(['node', 'codexagentteams', '--help'])).toEqual([
       'node',
@@ -33,4 +44,3 @@ describe('normalizeArgvForDefaultCommand', () => {
     ]);
   });
 });
-
