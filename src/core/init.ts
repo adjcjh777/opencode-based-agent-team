@@ -36,6 +36,12 @@ const defaultConfig = {
       websearch: 'allow',
       'mcp_*': 'ask'
     }
+  },
+  team: {
+    enabled: true,
+    maxTeammates: 3,
+    strategy: 'balanced',
+    worker: 'in-process'
   }
 };
 
@@ -100,4 +106,3 @@ export async function initializeProject({ cwd, force = false }: InitProjectOptio
 
   return result;
 }
-

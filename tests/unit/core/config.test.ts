@@ -290,4 +290,39 @@ describe('loadConfig', () => {
       'mcp_*': 'deny'
     });
   });
+
+  it('loads optional team runtime settings', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'right-codes',
+          baseUrl: 'https://example.right.codes/v1',
+          apiKey: 'test-key'
+        },
+        models: {
+          primary: 'claude-sonnet-4',
+          fast: 'claude-haiku-4',
+          reasoning: 'claude-opus-4'
+        },
+        team: {
+          enabled: true,
+          maxTeammates: 4,
+          strategy: 'parallel',
+          worker: 'in-process'
+        }
+      })
+    );
+
+    const config = await loadConfig({ cwd: dir });
+
+    expect(config.team).toEqual({
+      enabled: true,
+      maxTeammates: 4,
+      strategy: 'parallel',
+      worker: 'in-process'
+    });
+  });
 });

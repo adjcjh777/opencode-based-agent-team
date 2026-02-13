@@ -52,6 +52,15 @@ const providerSchema = z
 
 const permissionLevelSchema = z.enum(['allow', 'deny', 'ask']);
 
+const teamSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    maxTeammates: z.number().int().positive().optional(),
+    strategy: z.enum(['balanced', 'parallel', 'sequential']).optional(),
+    worker: z.enum(['in-process', 'worker']).optional()
+  })
+  .strict();
+
 const configSchema = z
   .object({
     $schema: z.string().optional(),
@@ -93,7 +102,8 @@ const configSchema = z
           )
           .optional()
       })
-      .optional()
+      .optional(),
+    team: teamSchema.optional()
   })
   .strict();
 
