@@ -249,6 +249,12 @@ npm run build
 5. `npm run build`
 6. `npm run dev -- doctor --json`（在示例配置/环境下）
 
+仓库已提供 GitHub Actions 示例：`.github/workflows/ci.yml`，默认在以下场景触发：
+
+- push 到 `main` / `develop` / `feature/**`
+- pull request
+- 手动 `workflow_dispatch`
+
 ## 10. 上线发布指南
 
 ### 10.1 发布前检查清单
@@ -319,4 +325,3 @@ codexagentteams --help
 4. 使用 `chat --message` 执行冒烟测试
 5. 接入 CI 并启用门禁
 6. 标记版本并发布
-

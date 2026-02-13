@@ -55,6 +55,7 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 - [x] Logging utilities (`src/core/logger.ts`)
 - [x] Diagnostics command (`src/core/doctor.ts`, `doctor` CLI)
 - [x] Release-oriented build packaging (`tsconfig.build.json`, `package.json` bin/files/prepack)
+- [x] CI automation (`.github/workflows/ci.yml`)
 - [x] Documentation updates (`README.md`, `IMPLEMENTATION_STATUS.md`, `docs/USAGE.md`)
 
 ## Verification Snapshot

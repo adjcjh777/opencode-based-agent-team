@@ -2,6 +2,8 @@
 
 Node.js + TypeScript CLI prototype inspired by OpenCode and Claude-style Agent Teams collaboration.
 
+![CI](https://github.com/adjcjh777/opencode-based-agent-team/actions/workflows/ci.yml/badge.svg)
+
 ## Current Status
 
 The implementation currently includes:
@@ -121,3 +123,9 @@ All of the above are currently passing on branch `feature/phase1-foundation`.
 ## Documentation
 
 - Detailed guide: `docs/USAGE.md`
+
+## CI
+
+- GitHub Actions workflow: `.github/workflows/ci.yml`
+- Trigger: push / pull request / manual dispatch
+- Jobs run: `lint`, `typecheck`, `test`, `build`, `doctor --json`
