@@ -130,4 +130,37 @@ describe('createToolRuntime', () => {
     await expect(runtime.execute('read', { path: filePath })).resolves.toEqual({ content: 'hello' });
     await expect(runtime.execute('list', { path: dir })).rejects.toThrow('Tool permission denied: list');
   });
+
+  it('delegates ask-level permission decisions to askPermission callback', async () => {
+    const manager = {
+      loadServers: vi.fn(async () => undefined),
+      connect: vi.fn(async () => undefined),
+      discoverTools: vi.fn(async () => []),
+      registerDiscoveredTools: vi.fn(() => 0)
+    };
+    const askPermission = vi.fn(async () => true);
+    const dir = await createTempDir();
+    const filePath = join(dir, 'ask.txt');
+    await writeFile(filePath, 'allow-through-ask');
+
+    const runtime = await createToolRuntime(
+      {
+        ...createBaseConfig(),
+        tools: {
+          permissions: {
+            read: 'ask'
+          }
+        }
+      },
+      {
+        manager,
+        askPermission
+      }
+    );
+
+    await expect(runtime.execute('read', { path: filePath })).resolves.toEqual({
+      content: 'allow-through-ask'
+    });
+    expect(askPermission).toHaveBeenCalledWith('read', { path: filePath });
+  });
 });

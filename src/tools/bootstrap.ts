@@ -15,6 +15,8 @@ import { PermissionManager } from './permission.js';
 import { ToolRegistry } from './registry.js';
 import type { ToolExecutionContext } from './types.js';
 
+type AskPermissionHandler = (toolName: string, args: unknown) => Promise<boolean>;
+
 export interface ToolRuntime {
   registry: ToolRegistry;
   permissions: PermissionManager;
@@ -28,6 +30,7 @@ export interface ToolRuntime {
 
 export interface ToolRuntimeDeps {
   manager?: MCPBootstrapManager;
+  askPermission?: AskPermissionHandler;
 }
 
 function registerBuiltinTools(registry: ToolRegistry): void {
@@ -48,7 +51,7 @@ export async function createToolRuntime(
   deps: ToolRuntimeDeps = {}
 ): Promise<ToolRuntime> {
   const registry = new ToolRegistry();
-  const permissions = new PermissionManager(config.tools?.permissions ?? {});
+  const permissions = new PermissionManager(config.tools?.permissions ?? {}, deps.askPermission);
   registerBuiltinTools(registry);
 
   const manager = deps.manager ?? new MCPManager();
