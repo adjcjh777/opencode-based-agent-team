@@ -2,6 +2,22 @@
   "name": "codexagentteams",
   "version": "0.1.0",
   "description": "Node.js CLI with Agent Teams capabilities",
+  "keywords": [
+    "ai",
+    "agent",
+    "cli",
+    "mcp",
+    "codex"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adjcjh777/opencode-based-agent-team.git"
+  },
+  "homepage": "https://github.com/adjcjh777/opencode-based-agent-team#readme",
+  "bugs": {
+    "url": "https://github.com/adjcjh777/opencode-based-agent-team/issues"
+  },
+  "license": "UNLICENSED",
   "type": "module",
   "bin": {
     "codexagentteams": "dist/src/index.js"

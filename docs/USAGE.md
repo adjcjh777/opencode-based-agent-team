@@ -342,6 +342,8 @@ codexagentteams --help
   - 统一变更说明与验证清单，降低评审成本。
 - Issue 模板：`.github/ISSUE_TEMPLATE/*.yml`
   - 缺陷与需求分流，保证问题信息完整。
+- 安全响应策略：`SECURITY.md`
+  - 指导漏洞上报与协同披露流程。
 
 建议在仓库设置中启用：
 

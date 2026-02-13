@@ -141,3 +141,7 @@ All of the above are currently passing on branch `feature/phase1-foundation`.
 - Dependency updates: `.github/dependabot.yml`
 - PR template: `.github/pull_request_template.md`
 - Issue templates: `.github/ISSUE_TEMPLATE/*.yml`
+
+## Security
+
+- Security policy: `SECURITY.md`
