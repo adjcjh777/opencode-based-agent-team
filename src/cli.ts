@@ -5,6 +5,7 @@ import { loadAgentPrompt } from './agent/prompts.js';
 import { loadConfig } from './core/config.js';
 import { runDoctor } from './core/doctor.js';
 import { CoreEngine } from './core/engine.js';
+import { initializeProject } from './core/init.js';
 import { LLMAdapter } from './llm/adapter.js';
 import { SessionManager } from './session/manager.js';
 import { SkillManager } from './skills/manager.js';
@@ -93,6 +94,27 @@ function createDoctorCommand(deps: CliDeps): Command {
     });
 }
 
+function createInitCommand(deps: CliDeps): Command {
+  return new Command('init')
+    .description('Initialize project config, prompts, and local skill directory')
+    .option('--force', 'overwrite existing generated files')
+    .action(async (options: { force?: boolean }) => {
+      const cwd = deps.cwd ?? process.cwd();
+      const result = await initializeProject({ cwd, force: options.force ?? false });
+
+      process.stdout.write(`Initialized project in ${cwd}\n`);
+      process.stdout.write(`Created: ${result.created.length}\n`);
+      for (const filePath of result.created) {
+        process.stdout.write(`  + ${filePath}\n`);
+      }
+
+      process.stdout.write(`Skipped: ${result.skipped.length}\n`);
+      for (const filePath of result.skipped) {
+        process.stdout.write(`  - ${filePath}\n`);
+      }
+    });
+}
+
 async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
   process.stdout.write(`Starting chat session with ${options.agent} agent...\n`);
 
@@ -156,6 +178,7 @@ export function createCli(deps: CliDeps = {}): Command {
   program.addCommand(createChatCommand(deps));
   program.addCommand(createConfigCommand(deps));
   program.addCommand(createDoctorCommand(deps));
+  program.addCommand(createInitCommand(deps));
 
   return program;
 }

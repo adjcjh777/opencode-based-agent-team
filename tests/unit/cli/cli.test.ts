@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -28,13 +28,14 @@ describe('createCli', () => {
     expect(program.version()).toBe('0.1.0');
   });
 
-  it('registers chat, config, and doctor commands', () => {
+  it('registers chat, config, doctor, and init commands', () => {
     const program = createCli();
     const names = program.commands.map((command) => command.name());
 
     expect(names).toContain('chat');
     expect(names).toContain('config');
     expect(names).toContain('doctor');
+    expect(names).toContain('init');
   });
 
   it('chat command enables ink ui mode and forwards options', async () => {
@@ -158,5 +159,34 @@ describe('createCli', () => {
     expect(report.ok).toBe(false);
     expect(report.checks.find((check) => check.id === 'config-file')?.status).toBe('fail');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('init command scaffolds config, prompts, and local skills directory', async () => {
+    const cwd = await createTempDir();
+    const output: string[] = [];
+    const writeSpy = vi
+      .spyOn(process.stdout, 'write')
+      .mockImplementation((chunk: string | Uint8Array) => {
+        output.push(typeof chunk === 'string' ? chunk : chunk.toString());
+        return true;
+      });
+
+    try {
+      const program = createCli({ cwd });
+      await program.parseAsync(['node', 'codexagentteams', 'init'], { from: 'node' });
+    } finally {
+      writeSpy.mockRestore();
+    }
+
+    const configContent = await readFile(join(cwd, 'codex.config.json'), 'utf8');
+    const buildPrompt = await readFile(join(cwd, 'agents', 'build.md'), 'utf8');
+    const planPrompt = await readFile(join(cwd, 'agents', 'plan.md'), 'utf8');
+    const outputText = output.join('');
+
+    expect(configContent).toContain('"provider"');
+    expect(buildPrompt).toContain('Build Agent');
+    expect(planPrompt).toContain('Plan Agent');
+    expect(outputText).toContain('Initialized project in');
+    expect(outputText).toContain('Created: 5');
   });
 });
