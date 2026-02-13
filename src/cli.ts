@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { loadAgentPrompt } from './agent/prompts.js';
 import { loadConfig } from './core/config.js';
+import { runDoctor } from './core/doctor.js';
 import { CoreEngine } from './core/engine.js';
 import { LLMAdapter } from './llm/adapter.js';
 import { SessionManager } from './session/manager.js';
@@ -19,20 +20,77 @@ export interface CliDeps {
   runChat?: (options: ChatCommandOptions) => Promise<void>;
   cwd?: string;
   codexHome?: string;
+  env?: NodeJS.ProcessEnv;
 }
 
-function createConfigCommand(): Command {
+function createConfigCommand(deps: CliDeps): Command {
   const configCommand = new Command('config').description('Inspect configuration and providers');
+  const cwd = deps.cwd ?? process.cwd();
+  const env = deps.env ?? process.env;
 
   configCommand
     .command('show')
     .description('Show effective configuration')
     .action(async () => {
-      const config = await loadConfig();
+      const config = await loadConfig({ cwd, env });
       process.stdout.write(`${JSON.stringify(config, null, 2)}\n`);
     });
 
+  configCommand
+    .command('validate')
+    .description('Validate effective configuration')
+    .action(async () => {
+      const config = await loadConfig({ cwd, env });
+      const mcpServerCount = config.mcp?.servers?.length ?? 0;
+      const permissionCount = Object.keys(config.tools?.permissions ?? {}).length;
+      process.stdout.write('Configuration is valid.\n');
+      process.stdout.write(`Provider: ${config.provider.type}\n`);
+      process.stdout.write(`MCP servers: ${mcpServerCount}\n`);
+      process.stdout.write(`Tool permission rules: ${permissionCount}\n`);
+    });
+
   return configCommand;
+}
+
+function statusTag(status: 'pass' | 'warn' | 'fail'): string {
+  if (status === 'pass') {
+    return 'PASS';
+  }
+
+  if (status === 'warn') {
+    return 'WARN';
+  }
+
+  return 'FAIL';
+}
+
+function createDoctorCommand(deps: CliDeps): Command {
+  return new Command('doctor')
+    .description('Run local environment diagnostics')
+    .option('--json', 'output machine-readable report')
+    .action(async (options: { json?: boolean }) => {
+      const cwd = deps.cwd ?? process.cwd();
+      const env = deps.env ?? process.env;
+      const codexHome = deps.codexHome ?? env.CODEX_HOME ?? join(cwd, '.codex');
+      const report = await runDoctor({ cwd, env, codexHome });
+
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+      } else {
+        process.stdout.write('CodexAgentTeams doctor report\n');
+        for (const check of report.checks) {
+          process.stdout.write(`[${statusTag(check.status)}] ${check.id}: ${check.message}\n`);
+          if (check.detail) {
+            process.stdout.write(`  ${check.detail}\n`);
+          }
+        }
+        process.stdout.write(`Overall status: ${report.ok ? 'PASS' : 'FAIL'}\n`);
+      }
+
+      if (!report.ok) {
+        process.exitCode = 1;
+      }
+    });
 }
 
 async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
@@ -96,7 +154,8 @@ export function createCli(deps: CliDeps = {}): Command {
     .version('0.1.0');
 
   program.addCommand(createChatCommand(deps));
-  program.addCommand(createConfigCommand());
+  program.addCommand(createConfigCommand(deps));
+  program.addCommand(createDoctorCommand(deps));
 
   return program;
 }
