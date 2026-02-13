@@ -135,3 +135,9 @@ All of the above are currently passing on branch `feature/phase1-foundation`.
 - GitHub Actions workflow: `.github/workflows/release.yml`
 - Trigger: tag push (e.g. `v0.2.0`) / manual dispatch
 - Publish target: npm registry (`NPM_TOKEN` secret required)
+
+## Governance
+
+- Dependency updates: `.github/dependabot.yml`
+- PR template: `.github/pull_request_template.md`
+- Issue templates: `.github/ISSUE_TEMPLATE/*.yml`

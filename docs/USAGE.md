@@ -331,3 +331,20 @@ codexagentteams --help
 4. 使用 `chat --message` 执行冒烟测试
 5. 接入 CI 并启用门禁
 6. 标记版本并发布
+
+## 13. 仓库治理建议（已内置）
+
+项目已内置以下治理能力：
+
+- `Dependabot`：`.github/dependabot.yml`
+  - 自动更新 npm 依赖与 GitHub Actions 依赖。
+- PR 模板：`.github/pull_request_template.md`
+  - 统一变更说明与验证清单，降低评审成本。
+- Issue 模板：`.github/ISSUE_TEMPLATE/*.yml`
+  - 缺陷与需求分流，保证问题信息完整。
+
+建议在仓库设置中启用：
+
+- Branch protection（强制 CI 通过后合并）
+- Require pull request reviews（至少 1 个评审）
+- Auto-delete head branches（合并后自动清理分支）

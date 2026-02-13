@@ -57,6 +57,7 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 - [x] Release-oriented build packaging (`tsconfig.build.json`, `package.json` bin/files/prepack)
 - [x] CI automation (`.github/workflows/ci.yml`)
 - [x] Release automation (`.github/workflows/release.yml`)
+- [x] Repository governance automation (`.github/dependabot.yml`, PR/Issue templates)
 - [x] Documentation updates (`README.md`, `IMPLEMENTATION_STATUS.md`, `docs/USAGE.md`)
 
 ## Verification Snapshot

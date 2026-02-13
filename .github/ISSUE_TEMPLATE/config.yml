@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Usage & Deployment Guide
+    url: https://github.com/adjcjh777/opencode-based-agent-team/blob/main/docs/USAGE.md
+    about: Read the complete usage guide before opening an issue.
+
