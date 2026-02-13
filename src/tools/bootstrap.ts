@@ -11,10 +11,18 @@ import { createWebSearchTool } from './builtin/web-search.js';
 import { createWriteTool } from './builtin/write.js';
 import { MCPManager } from './mcp/client.js';
 import { bootstrapMcpTools, type MCPBootstrapManager, type MCPBootstrapResult } from './mcp/bootstrap.js';
+import { PermissionManager } from './permission.js';
 import { ToolRegistry } from './registry.js';
+import type { ToolExecutionContext } from './types.js';
 
 export interface ToolRuntime {
   registry: ToolRegistry;
+  permissions: PermissionManager;
+  execute: <TArgs = unknown, TResult = unknown>(
+    toolName: string,
+    args: TArgs,
+    context?: ToolExecutionContext
+  ) => Promise<TResult>;
   mcp: MCPBootstrapResult;
 }
 
@@ -40,13 +48,30 @@ export async function createToolRuntime(
   deps: ToolRuntimeDeps = {}
 ): Promise<ToolRuntime> {
   const registry = new ToolRegistry();
+  const permissions = new PermissionManager(config.tools?.permissions ?? {});
   registerBuiltinTools(registry);
 
   const manager = deps.manager ?? new MCPManager();
   const mcp = await bootstrapMcpTools(config, manager, registry);
 
+  const execute: ToolRuntime['execute'] = async (toolName, args, context) => {
+    const tool = registry.get(toolName);
+    if (!tool) {
+      throw new Error(`Unknown tool: ${toolName}`);
+    }
+
+    const allowed = await permissions.check(toolName, args);
+    if (!allowed) {
+      throw new Error(`Tool permission denied: ${toolName}`);
+    }
+
+    return tool.execute(args, context);
+  };
+
   return {
     registry,
+    permissions,
+    execute,
     mcp
   };
 }

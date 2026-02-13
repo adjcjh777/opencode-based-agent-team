@@ -1,7 +1,23 @@
-import { describe, expect, it, vi } from 'vitest';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { CodexConfig } from '../../../src/core/config.js';
 import { createToolRuntime } from '../../../src/tools/bootstrap.js';
+
+const tempDirs: string[] = [];
+
+async function createTempDir(): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), 'codexagenttools-bootstrap-'));
+  tempDirs.push(dir);
+  return dir;
+}
+
+afterEach(async () => {
+  await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
+});
 
 function createBaseConfig(): CodexConfig {
   return {
@@ -85,5 +101,33 @@ describe('createToolRuntime', () => {
     expect(runtime.registry.get('mcp_test_ping')).toBeDefined();
     expect(runtime.mcp.toolsRegistered).toBe(1);
     expect(runtime.mcp.serverIds).toEqual(['test']);
+  });
+
+  it('executes allowed tools and blocks denied tools', async () => {
+    const manager = {
+      loadServers: vi.fn(async () => undefined),
+      connect: vi.fn(async () => undefined),
+      discoverTools: vi.fn(async () => []),
+      registerDiscoveredTools: vi.fn(() => 0)
+    };
+    const dir = await createTempDir();
+    const filePath = join(dir, 'sample.txt');
+    await writeFile(filePath, 'hello');
+
+    const runtime = await createToolRuntime(
+      {
+        ...createBaseConfig(),
+        tools: {
+          permissions: {
+            read: 'allow',
+            list: 'deny'
+          }
+        }
+      },
+      { manager }
+    );
+
+    await expect(runtime.execute('read', { path: filePath })).resolves.toEqual({ content: 'hello' });
+    await expect(runtime.execute('list', { path: dir })).rejects.toThrow('Tool permission denied: list');
   });
 });
