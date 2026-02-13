@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { join } from 'node:path';
+import { createInterface } from 'node:readline/promises';
 
 import { loadAgentPrompt } from './agent/prompts.js';
 import { loadConfig } from './core/config.js';
@@ -118,7 +119,8 @@ function createInitCommand(deps: CliDeps): Command {
 async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
   process.stdout.write(`Starting chat session with ${options.agent} agent...\n`);
 
-  if (!options.message) {
+  if (!options.message && (!process.stdin.isTTY || !process.stdout.isTTY)) {
+    process.stdout.write('Interactive chat requires a TTY. Use `codexagentteams run "..."`.\n');
     return;
   }
 
@@ -127,9 +129,45 @@ async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
   const adapter = LLMAdapter.create(config);
   const session = new SessionManager({ activeAgent: options.agent });
   const engine = new CoreEngine({ adapter, session, systemPrompt: options.systemPrompt });
-  const result = await engine.runTurn(options.message);
 
-  process.stdout.write(`${result.assistant}\n`);
+  if (options.message) {
+    const result = await engine.runTurn(options.message);
+    process.stdout.write(`${result.assistant}\n`);
+    return;
+  }
+
+  process.stdout.write('Interactive mode. Type /exit to quit.\n');
+
+  const readline = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: true
+  });
+
+  try {
+    while (true) {
+      const rawInput = await readline.question('> ');
+      const userInput = rawInput.trim();
+
+      if (userInput.length === 0) {
+        continue;
+      }
+
+      if (userInput === '/exit' || userInput === '/quit') {
+        break;
+      }
+
+      try {
+        const result = await engine.runTurn(userInput);
+        process.stdout.write(`${result.assistant}\n`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        process.stdout.write(`Error: ${message}\n`);
+      }
+    }
+  } finally {
+    readline.close();
+  }
 }
 
 async function resolveChatContext(options: ChatCommandOptions, deps: CliDeps): Promise<ChatCommandOptions> {
@@ -167,6 +205,20 @@ function createChatCommand(deps: CliDeps): Command {
     });
 }
 
+function createRunCommand(deps: CliDeps): Command {
+  const runChat = deps.runChat ?? runChatWithDefaults;
+
+  return new Command('run')
+    .description('Run a single task and exit')
+    .argument('<message...>', 'task message')
+    .option('--agent <name>', 'agent name', 'build')
+    .action(async (messageParts: string[], options: { agent: string }) => {
+      const message = messageParts.join(' ').trim();
+      const chatContext = await resolveChatContext({ agent: options.agent, message }, deps);
+      await runChat(chatContext);
+    });
+}
+
 export function createCli(deps: CliDeps = {}): Command {
   const program = new Command();
 
@@ -176,6 +228,7 @@ export function createCli(deps: CliDeps = {}): Command {
     .version('0.1.0');
 
   program.addCommand(createChatCommand(deps));
+  program.addCommand(createRunCommand(deps));
   program.addCommand(createConfigCommand(deps));
   program.addCommand(createDoctorCommand(deps));
   program.addCommand(createInitCommand(deps));

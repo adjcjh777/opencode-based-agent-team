@@ -28,14 +28,35 @@ describe('createCli', () => {
     expect(program.version()).toBe('0.1.0');
   });
 
-  it('registers chat, config, doctor, and init commands', () => {
+  it('registers chat, run, config, doctor, and init commands', () => {
     const program = createCli();
     const names = program.commands.map((command) => command.name());
 
     expect(names).toContain('chat');
+    expect(names).toContain('run');
     expect(names).toContain('config');
     expect(names).toContain('doctor');
     expect(names).toContain('init');
+  });
+
+  it('run command forwards positional message to chat runtime', async () => {
+    const runChat = vi.fn(async () => undefined);
+    const program = createCli({ runChat });
+
+    await program.parseAsync(
+      ['node', 'codexagentteams', 'run', '--agent', 'plan', 'review', 'the', 'diff'],
+      {
+        from: 'node'
+      }
+    );
+
+    expect(runChat).toHaveBeenCalledTimes(1);
+    expect(runChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent: 'plan',
+        message: 'review the diff'
+      })
+    );
   });
 
   it('chat command enables ink ui mode and forwards options', async () => {
