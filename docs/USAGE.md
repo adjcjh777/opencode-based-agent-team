@@ -272,6 +272,12 @@ npm version patch
 npm publish
 ```
 
+也可使用仓库内置发布流水线：`.github/workflows/release.yml`
+
+- 推送 tag（如 `v0.2.0`）会触发发布流程。
+- 流程会先执行 `lint/typecheck/test/build`，全部通过后再 `npm publish --provenance`。
+- 需要在仓库 Secrets 中配置：`NPM_TOKEN`。
+
 说明：
 
 - 项目已配置 `bin` 与 `prepack`，发布时会先自动构建。

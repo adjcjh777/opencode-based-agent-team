@@ -129,3 +129,9 @@ All of the above are currently passing on branch `feature/phase1-foundation`.
 - GitHub Actions workflow: `.github/workflows/ci.yml`
 - Trigger: push / pull request / manual dispatch
 - Jobs run: `lint`, `typecheck`, `test`, `build`, `doctor --json`
+
+## Release
+
+- GitHub Actions workflow: `.github/workflows/release.yml`
+- Trigger: tag push (e.g. `v0.2.0`) / manual dispatch
+- Publish target: npm registry (`NPM_TOKEN` secret required)
