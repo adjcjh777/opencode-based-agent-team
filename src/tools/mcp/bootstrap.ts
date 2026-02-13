@@ -2,7 +2,7 @@ import type { CodexConfig } from '../../core/config.js';
 import type { ToolRegistry } from '../registry.js';
 import { extractMcpServerConfigs } from './loader.js';
 
-interface MCPBootstrapManager {
+export interface MCPBootstrapManager {
   loadServers(configs: ReturnType<typeof extractMcpServerConfigs>): Promise<void>;
   connect(serverId: string): Promise<void>;
   discoverTools(serverId: string): Promise<unknown>;

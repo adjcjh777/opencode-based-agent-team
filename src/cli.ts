@@ -7,6 +7,7 @@ import { CoreEngine } from './core/engine.js';
 import { LLMAdapter } from './llm/adapter.js';
 import { SessionManager } from './session/manager.js';
 import { SkillManager } from './skills/manager.js';
+import { createToolRuntime } from './tools/bootstrap.js';
 
 export interface ChatCommandOptions {
   agent: string;
@@ -42,6 +43,7 @@ async function runChatWithDefaults(options: ChatCommandOptions): Promise<void> {
   }
 
   const config = await loadConfig();
+  await createToolRuntime(config);
   const adapter = LLMAdapter.create(config);
   const session = new SessionManager({ activeAgent: options.agent });
   const engine = new CoreEngine({ adapter, session, systemPrompt: options.systemPrompt });
