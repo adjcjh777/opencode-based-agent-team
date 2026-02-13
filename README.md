@@ -123,6 +123,8 @@ All of the above are currently passing on branch `feature/phase1-foundation`.
 ## Documentation
 
 - Detailed guide: `docs/USAGE.md`
+- Contributing guide: `CONTRIBUTING.md`
+- Security policy: `SECURITY.md`
 
 ## CI
 

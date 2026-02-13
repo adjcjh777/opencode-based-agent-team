@@ -59,7 +59,7 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 - [x] Release automation (`.github/workflows/release.yml`)
 - [x] Repository governance automation (`.github/dependabot.yml`, PR/Issue templates)
 - [x] Security policy (`SECURITY.md`)
-- [x] Documentation updates (`README.md`, `IMPLEMENTATION_STATUS.md`, `docs/USAGE.md`, `SECURITY.md`)
+- [x] Documentation updates (`README.md`, `IMPLEMENTATION_STATUS.md`, `docs/USAGE.md`, `SECURITY.md`, `CONTRIBUTING.md`)
 
 ## Verification Snapshot
 
