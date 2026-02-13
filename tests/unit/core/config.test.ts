@@ -19,6 +19,34 @@ afterEach(async () => {
 });
 
 describe('loadConfig', () => {
+  it('accepts optional $schema metadata key in config file', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        $schema: './config-schema.json',
+        provider: {
+          type: 'right-codes',
+          baseUrl: 'https://example.right.codes/v1',
+          apiKey: 'test-key'
+        },
+        models: {
+          primary: 'claude-sonnet-4',
+          fast: 'claude-haiku-4',
+          reasoning: 'claude-opus-4'
+        }
+      })
+    );
+
+    const config = await loadConfig({ cwd: dir });
+
+    expect(config.provider).toMatchObject({
+      type: 'right-codes',
+      baseUrl: 'https://example.right.codes/v1'
+    });
+  });
+
   it('loads codex.config.json from working directory', async () => {
     const dir = await createTempDir();
     const filePath = join(dir, 'codex.config.json');

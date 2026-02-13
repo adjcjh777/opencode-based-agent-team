@@ -54,6 +54,7 @@ const permissionLevelSchema = z.enum(['allow', 'deny', 'ask']);
 
 const configSchema = z
   .object({
+    $schema: z.string().optional(),
     provider: providerSchema,
     models: z
       .object({
