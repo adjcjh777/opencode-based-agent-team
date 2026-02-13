@@ -112,6 +112,7 @@ export type CodexConfig = z.infer<typeof configSchema>;
 export interface LoadConfigOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
+  resolveProviderEnv?: boolean;
 }
 
 function applyProviderEnvFallback(config: CodexConfig, env: NodeJS.ProcessEnv): CodexConfig {
@@ -173,6 +174,7 @@ function applyProviderEnvFallback(config: CodexConfig, env: NodeJS.ProcessEnv): 
 
 export async function loadConfig(options: LoadConfigOptions = {}): Promise<CodexConfig> {
   const env = options.env ?? process.env;
+  const resolveProviderEnv = options.resolveProviderEnv ?? true;
   const explorer = cosmiconfig('codex', {
     searchPlaces: ['codex.config.json']
   });
@@ -185,5 +187,9 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Codex
   }
 
   const parsed = configSchema.parse(result.config);
+  if (!resolveProviderEnv) {
+    return parsed;
+  }
+
   return applyProviderEnvFallback(parsed, env);
 }

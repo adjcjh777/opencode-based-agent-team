@@ -131,6 +131,34 @@ describe('loadConfig', () => {
     );
   });
 
+  it('can skip provider credential resolution for non-LLM commands', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'right-codes',
+          apiKey: '${RC_API_KEY}',
+          baseUrl: '${RC_BASE_URL}'
+        },
+        models: {
+          primary: 'claude-sonnet-4',
+          fast: 'claude-haiku-4',
+          reasoning: 'claude-opus-4'
+        }
+      })
+    );
+
+    const config = await loadConfig({ cwd: dir, env: {}, resolveProviderEnv: false });
+
+    expect(config.provider).toMatchObject({
+      type: 'right-codes',
+      apiKey: '${RC_API_KEY}',
+      baseUrl: '${RC_BASE_URL}'
+    });
+  });
+
   it('loads anthropic provider config with env fallback', async () => {
     const dir = await createTempDir();
     const filePath = join(dir, 'codex.config.json');

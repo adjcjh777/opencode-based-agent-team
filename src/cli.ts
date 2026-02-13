@@ -306,7 +306,7 @@ function createMcpCommand(deps: CliDeps): Command {
     .action(async () => {
       const cwd = resolveCwd(deps);
       const env = resolveEnv(deps);
-      const config = await loadConfig({ cwd, env });
+      const config = await loadConfig({ cwd, env, resolveProviderEnv: false });
       const servers = extractMcpServerConfigs(config);
 
       if (servers.length === 0) {
@@ -325,7 +325,7 @@ function createMcpCommand(deps: CliDeps): Command {
     .action(async (serverId?: string) => {
       const cwd = resolveCwd(deps);
       const env = resolveEnv(deps);
-      const config = await loadConfig({ cwd, env });
+      const config = await loadConfig({ cwd, env, resolveProviderEnv: false });
       const manager = new MCPManager();
       const servers = extractMcpServerConfigs(config).filter((server) => (serverId ? server.id === serverId : true));
 
@@ -432,11 +432,11 @@ function createTeamCommand(deps: CliDeps): Command {
   teamCommand
     .command('status')
     .description('Show team runtime settings')
-    .action(async () => {
-      const cwd = resolveCwd(deps);
-      const env = resolveEnv(deps);
-      const config = await loadConfig({ cwd, env });
-      const settings = resolveTeamRuntimeSettings(config);
+      .action(async () => {
+        const cwd = resolveCwd(deps);
+        const env = resolveEnv(deps);
+        const config = await loadConfig({ cwd, env, resolveProviderEnv: false });
+        const settings = resolveTeamRuntimeSettings(config);
 
       process.stdout.write(`enabled: ${settings.enabled}\n`);
       process.stdout.write(`maxTeammates: ${settings.maxTeammates}\n`);
@@ -448,11 +448,11 @@ function createTeamCommand(deps: CliDeps): Command {
     .command('run')
     .description('Plan and execute tasks with teammates')
     .argument('<request...>', 'request text')
-    .action(async (requestParts: string[]) => {
-      const cwd = resolveCwd(deps);
-      const env = resolveEnv(deps);
-      const config = await loadConfig({ cwd, env });
-      const settings = resolveTeamRuntimeSettings(config);
+      .action(async (requestParts: string[]) => {
+        const cwd = resolveCwd(deps);
+        const env = resolveEnv(deps);
+        const config = await loadConfig({ cwd, env, resolveProviderEnv: false });
+        const settings = resolveTeamRuntimeSettings(config);
 
       if (!settings.enabled) {
         process.stdout.write('Team mode is disabled in config (team.enabled=false).\n');
