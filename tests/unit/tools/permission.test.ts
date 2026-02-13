@@ -57,4 +57,14 @@ describe('PermissionManager', () => {
     await expect(manager.check('mcp_filesystem_delete_file', {})).resolves.toBe(false);
     await expect(manager.check('mcp_filesystem_read_file', {})).resolves.toBe(true);
   });
+
+  it('prefers more specific wildcard pattern when multiple match', async () => {
+    const manager = new PermissionManager({
+      'mcp_*': 'deny',
+      'mcp_filesystem_*': 'allow'
+    });
+
+    await expect(manager.check('mcp_filesystem_read_file', {})).resolves.toBe(true);
+    await expect(manager.check('mcp_browser_search', {})).resolves.toBe(false);
+  });
 });
