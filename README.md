@@ -32,6 +32,7 @@ The implementation currently includes:
 
 ```bash
 npm install
+npm run dev -- init
 npm run dev -- chat
 ```
 
@@ -45,6 +46,18 @@ Show effective configuration:
 
 ```bash
 npm run dev -- config show
+```
+
+Validate configuration:
+
+```bash
+npm run dev -- config validate
+```
+
+Run local diagnostics:
+
+```bash
+npm run dev -- doctor
 ```
 
 ## Environment Variables
@@ -104,3 +117,7 @@ npm run lint
 ```
 
 All of the above are currently passing on branch `feature/phase1-foundation`.
+
+## Documentation
+
+- Detailed guide: `docs/USAGE.md`

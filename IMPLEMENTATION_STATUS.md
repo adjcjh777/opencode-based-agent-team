@@ -6,6 +6,7 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 
 - [x] Project scaffold (`TypeScript`, `ESLint`, `Prettier`, `vitest`, `tsx`)
 - [x] CLI entry and command parsing (`src/index.ts`, `src/cli.ts`)
+- [x] Project initialization command (`src/core/init.ts`, `init` CLI)
 - [x] Config system with `codex.config.json` (`src/core/config.ts`)
 - [x] right.codes adapter support (`src/llm/providers/right-codes.ts`)
 - [x] LLM adapter layer (`src/llm/adapter.ts`)
@@ -52,7 +53,9 @@ This file tracks completion status against `IMPLEMENTATION_PLAN.md`.
 - [x] Session persistence (`src/session/store.ts`)
 - [x] Retry and error handling (`src/core/retry.ts`, chat-loop integration)
 - [x] Logging utilities (`src/core/logger.ts`)
-- [x] Documentation updates (`README.md`, `IMPLEMENTATION_STATUS.md`)
+- [x] Diagnostics command (`src/core/doctor.ts`, `doctor` CLI)
+- [x] Release-oriented build packaging (`tsconfig.build.json`, `package.json` bin/files/prepack)
+- [x] Documentation updates (`README.md`, `IMPLEMENTATION_STATUS.md`, `docs/USAGE.md`)
 
 ## Verification Snapshot
 
