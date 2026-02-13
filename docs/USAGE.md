@@ -255,6 +255,11 @@ npm run build
 - pull request
 - 手动 `workflow_dispatch`
 
+CI 采用矩阵验证：
+
+- OS：`ubuntu-latest`、`windows-latest`
+- Node：`20`、`22`
+
 ## 10. 上线发布指南
 
 ### 10.1 发布前检查清单

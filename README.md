@@ -130,6 +130,7 @@ All of the above are currently passing on branch `feature/phase1-foundation`.
 
 - GitHub Actions workflow: `.github/workflows/ci.yml`
 - Trigger: push / pull request / manual dispatch
+- Matrix: `ubuntu-latest` + `windows-latest`, Node `20` + `22`
 - Jobs run: `lint`, `typecheck`, `test`, `build`, `doctor --json`
 
 ## Release

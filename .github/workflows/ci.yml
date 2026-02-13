@@ -11,11 +11,14 @@ on:
 
 jobs:
   verify:
-    name: Verify (Node ${{ matrix.node }})
-    runs-on: ubuntu-latest
+    name: Verify (${{ matrix.os }} / Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
         node:
           - '20'
           - '22'
@@ -50,4 +53,3 @@ jobs:
         env:
           RC_API_KEY: ci-dummy-key
           RC_BASE_URL: https://example.right.codes/v1
-
