@@ -50,6 +50,8 @@ const providerSchema = z
       .strict()
   ]);
 
+const permissionLevelSchema = z.enum(['allow', 'deny', 'ask']);
+
 const configSchema = z
   .object({
     provider: providerSchema,
@@ -60,6 +62,12 @@ const configSchema = z
         reasoning: z.string()
       })
       .strict(),
+    tools: z
+      .object({
+        permissions: z.record(z.string(), permissionLevelSchema).optional()
+      })
+      .strict()
+      .optional(),
     mcp: z
       .object({
         servers: z

@@ -227,4 +227,39 @@ describe('loadConfig', () => {
       apiKey: 'google-env-key'
     });
   });
+
+  it('loads tool permission rules with wildcard patterns', async () => {
+    const dir = await createTempDir();
+    const filePath = join(dir, 'codex.config.json');
+    await writeFile(
+      filePath,
+      JSON.stringify({
+        provider: {
+          type: 'right-codes',
+          baseUrl: 'https://example.right.codes/v1',
+          apiKey: 'test-key'
+        },
+        models: {
+          primary: 'claude-sonnet-4',
+          fast: 'claude-haiku-4',
+          reasoning: 'claude-opus-4'
+        },
+        tools: {
+          permissions: {
+            read: 'allow',
+            bash: 'ask',
+            'mcp_*': 'deny'
+          }
+        }
+      })
+    );
+
+    const config = await loadConfig({ cwd: dir });
+
+    expect(config.tools?.permissions).toEqual({
+      read: 'allow',
+      bash: 'ask',
+      'mcp_*': 'deny'
+    });
+  });
 });
